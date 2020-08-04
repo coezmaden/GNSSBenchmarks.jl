@@ -25,6 +25,7 @@ module GNSSBenchmarks
     include("gpu_carrier_replica.jl")
     include("gpu_code_replica.jl")
     include("gpu_correlate.jl")
+    include("gpu_tracking_loop.jl")
 
     const MAX_NUM_SAMPLES = 5000
     const SAMPLES = StepRange(2500,2500,MAX_NUM_SAMPLES)
