@@ -14,9 +14,9 @@ function benchmark_downconvert()
     #init data frame
     results = DataFrame(
         Samples = SAMPLES, 
-        sCPU_median = length(SAMPLES),
-        GPU_median = length(SAMPLES),
-        sGPU_median = length(SAMPLES)
+        sCPU_median = zeros(Float32,length(SAMPLES)),
+        GPU_median = zeros(Float32,length(SAMPLES)),
+        sGPU_median = zeros(Float32,length(SAMPLES))
     )
     counter = Int32(1)
     for N in SAMPLES
@@ -34,15 +34,17 @@ function benchmark_downconvert()
         println(result)
         results.sCPU_median[counter] = result
         println("Benchmarking downconvert on GPU: CuArray{ComplexF32} ", N, " samples...")
-        println(median(@benchmark CUDA.@sync gpu_downconvert!(
+        result = median(@benchmark CUDA.@sync gpu_downconvert!(
             $gpudwnsignal,
             $gpucarrier,
             $gpusignal,
             1,
             $N
-        )).time)
+        )).time
+        println(result)
+        results.GPU_median[counter] = result
         println("Benchmarking downconvert on GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples...")
-        println(median(@benchmark CUDA.@sync gpu_downconvert!(
+        result = median(@benchmark CUDA.@sync gpu_downconvert!(
             $sgpudwnsignal.re,
             $sgpudwnsignal.im,
             $sgpucarrier.re,
@@ -51,10 +53,12 @@ function benchmark_downconvert()
             $sgpusignal.im,
             1,
             $N
-        )).time)
+        )).time
+        println(result)
+        results.sGPU_median[counter] = result
         counter += 1
     end
-    return results
+    CSV.write("//data//downconvert.csv", results)
 end
 
 function benchmark_carrier_replica()
