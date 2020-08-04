@@ -1,0 +1,13 @@
+name = "GNSSBenchmarks"
+uuid = "c41c76d0-7de9-43e4-ac23-0eef9501dc07"
+authors = ["Can Ozmaden"]
+version = "0.1.0"
+
+[compat]
+julia = "1.5"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
