@@ -36,12 +36,12 @@ end
 
 # Float32 implementation of the orig. CPU function
 function gpu_downconvert!(
-    downconverted_signal_re::Array{ComplexF32},
-    downconverted_signal_im::Array{ComplexF32},
-    carrier_re,
-    carrier_im,
-    signal_re::Array{ComplexF32},
-    signal_im::Array{ComplexF32},
+    downconverted_signal_re::Array{Float32},
+    downconverted_signal_im::Array{Float32},
+    carrier_re::Array{Float32},
+    carrier_im::Array{Float32},
+    signal_re::Array{Float32},
+    signal_im::Array{Float32},
     start_sample::Integer,
     num_samples_left::Integer
 )

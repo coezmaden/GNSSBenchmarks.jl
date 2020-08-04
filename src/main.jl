@@ -11,10 +11,17 @@ function benchmark_downconvert()
     sgpusignal = StructArray{ComplexF32}((real(gpusignal),imag(gpusignal)))
     sgpucarrier = copy(sgpusignal)
     sgpudwnsignal = StructArray{ComplexF32}((real(gpudwnsignal),imag(gpudwnsignal)))
-
+    #init data frame
+    results = DataFrame(
+        Samples = SAMPLES, 
+        sCPU_median = length(SAMPLES),
+        GPU_median = length(SAMPLES),
+        sGPU_median = length(SAMPLES)
+    )
+    counter = Int32(1)
     for N in SAMPLES
         println("Benchmarking downconvert on CPU: StructArray{ComplexF32} ", N," samples...")
-        println(median(@benchmark gpu_downconvert!(
+        result = median(@benchmark gpu_downconvert!(
             $scpudwnsignal.re,
             $scpudwnsignal.im,
             $scpucarrier.re,
@@ -23,7 +30,9 @@ function benchmark_downconvert()
             $scpusignal.im,
             1,
             $N
-        )).time)
+        )).time
+        println(result)
+        results.sCPU_median[counter] = result
         println("Benchmarking downconvert on GPU: CuArray{ComplexF32} ", N, " samples...")
         println(median(@benchmark CUDA.@sync gpu_downconvert!(
             $gpudwnsignal,
@@ -43,7 +52,9 @@ function benchmark_downconvert()
             1,
             $N
         )).time)
+        counter += 1
     end
+    return results
 end
 
 function benchmark_carrier_replica()

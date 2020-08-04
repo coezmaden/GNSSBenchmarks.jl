@@ -6,7 +6,8 @@ module GNSSBenchmarks
         BenchmarkTools,
         LoopVectorization,
         Tracking,
-        GNSSSignals
+        GNSSSignals,
+        DataFrames
     
     import
         LinearAlgebra.dot,
@@ -25,6 +26,6 @@ module GNSSBenchmarks
     include("gpu_code_replica.jl")
     include("gpu_correlate.jl")
 
-    const MAX_NUM_SAMPLES = 5000
+    const MAX_NUM_SAMPLES = 50000
     const SAMPLES = StepRange(2500,2500,MAX_NUM_SAMPLES)
 end
