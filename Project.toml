@@ -18,6 +18,7 @@ Tracking = "10b2438b-ffd4-5096-aa58-44041d5c8f3b"
 [compat]
 GNSSSignals = "0.13"
 LoopVectorization = "0.8"
+Query = "1.0"
 Tracking = "0.13"
 julia = "1.4"
 
