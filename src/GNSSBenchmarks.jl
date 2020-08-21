@@ -10,7 +10,7 @@ module GNSSBenchmarks
         GNSSSignals,
         DataFrames
 
-    using Unitful: upreferred, Hz, dBHz, ms
+    using Unitful: upreferred, Hz, dBHz, ms, kHz, MHz
     
     import
         LinearAlgebra.dot,
@@ -24,7 +24,16 @@ module GNSSBenchmarks
         Tracking.SecondaryCodeOrBitDetector,
         Tracking.GainControlledSignal,
         Tracking.found,
-        TrackingLoopFilters.AbstractLoopFilter
+        Tracking.TrackingResults,
+        Tracking.BitBuffer,
+        Tracking.get_default_post_corr_filter,
+        Tracking.get_num_samples_left_to_integrate,
+        Tracking.get_num_samples,
+        Tracking.get_current_carrier_frequency,
+        Tracking.get_current_code_frequency,
+        TrackingLoopFilters.AbstractLoopFilter,
+        GNSSSignals.AbstractGNSSSystem,
+        
 
     export
         main,

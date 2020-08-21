@@ -11,7 +11,7 @@ function gpu_gen_code_replica!(
     prn::Integer
 ) where S <: AbstractGNSSSystem
     code_replica = CuArray{ComplexF32}(
-        get_code.(
+        GNSSSignals.get_code.(
             GPSL1,
             code_frequency .* (1:MAX_NUM_SAMPLES) ./ sampling_frequency .+ start_code_phase,
             prn

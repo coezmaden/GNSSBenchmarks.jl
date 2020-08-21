@@ -1,6 +1,6 @@
 function gpu_track(
     signal,
-    state::TrackingState{S, C, CALF, COLF, CN, DS},
+    state::gpuTrackingState{S, C, CALF, COLF, CN, DS},
     prn::Integer,
     sampling_frequency;
     post_corr_filter = get_default_post_corr_filter(get_correlator(state)),
@@ -19,12 +19,10 @@ C <: AbstractCorrelator,
 CALF <: AbstractLoopFilter,
 COLF <: AbstractLoopFilter,
 CN <: AbstractCN0Estimator,
-DS <: StructArray,
+DS <: Union{CuArray, StructArray},
 N
 }
 correlator = get_correlator(state)
-agc_amplitude_power = get_amplitude_power(gain_controlled_signal)
-agc_attenuation = get_attenuation(gain_controlled_signal)
 downconverted_signal = resize!(get_downconverted_signal(state), size(signal, 1))
 carrier_replica = resize!(get_carrier(state), size(signal, 1))
 code_replica = resize!(get_code(state), size(signal, 1) + 2 * maximum(early_late_sample_shift))
@@ -99,7 +97,7 @@ while true
         Val(7)
     )
     integrated_samples += num_samples_left
-    carrier_phase = update_carrier_phase(
+    carrier_phase = Tracking.update_carrier_phase(
         num_samples_left,
         carrier_frequency,
         sampling_frequency,
@@ -107,7 +105,7 @@ while true
         carrier_amplitude_power
     )
     prev_code_phase = code_phase
-    code_phase = update_code_phase(
+    code_phase = Tracking.update_code_phase(
         S,
         num_samples_left,
         code_frequency,
@@ -120,11 +118,11 @@ while true
             integration_time >= min_integration_time
         got_correlator = true
 
-        correlator = normalize(correlator, integrated_samples)
+        correlator = Tracking.normalize(correlator, integrated_samples)
         valid_correlator = correlator
-        filtered_correlator = filter(post_corr_filter, correlator)
-        pll_discriminator = pll_disc(S, filtered_correlator)
-        dll_discriminator = dll_disc(
+        filtered_correlator = Tracking.filter(post_corr_filter, correlator)
+        pll_discriminator = Tracking.pll_disc(S, filtered_correlator)
+        dll_discriminator = Tracking.dll_disc(
             S,
             filtered_correlator,
             early_late_sample_shift,
@@ -142,7 +140,7 @@ while true
             integration_time,
             code_loop_filter_bandwidth
         )
-        carrier_doppler, code_doppler = aid_dopplers(
+        carrier_doppler, code_doppler = Tracking.aid_dopplers(
             S,
             init_carrier_doppler,
             init_code_doppler,
@@ -150,8 +148,8 @@ while true
             code_freq_update,
             velocity_aiding
         )
-        cn0_estimator = update(cn0_estimator, get_prompt(filtered_correlator))
-        bit_buffer, prompt_accumulator = buffer(
+        cn0_estimator = Tracking.update(cn0_estimator, get_prompt(filtered_correlator))
+        bit_buffer, prompt_accumulator = Tracking.buffer(
             S,
             bit_buffer,
             prompt_accumulator,
@@ -161,7 +159,7 @@ while true
             max_integration_time,
             get_prompt(filtered_correlator)
         )
-        sc_bit_detector = find(S, sc_bit_detector, get_prompt(filtered_correlator))
+        sc_bit_detector = Tracking.find(S, sc_bit_detector, get_prompt(filtered_correlator))
         correlator = zero(correlator)
         integrated_samples = 0
     end
@@ -169,7 +167,7 @@ while true
     num_samples_left == signal_samples_left && break
     signal_start_sample += num_samples_left
 end
-next_state = TrackingState{S, C, CALF, COLF, CN, DS}(
+next_state = gpuTrackingState{S, C, CALF, COLF, CN, DS}(
     init_carrier_doppler,
     init_code_doppler,
     carrier_doppler,
@@ -187,6 +185,6 @@ next_state = TrackingState{S, C, CALF, COLF, CN, DS}(
     carrier_replica,
     code_replica
 )
-estimated_cn0 = estimate_cn0(cn0_estimator, max_integration_time)
+estimated_cn0 = Tracking.estimate_cn0(cn0_estimator, max_integration_time)
 TrackingResults(next_state, valid_correlator, got_correlator, bit_buffer, estimated_cn0)
 end

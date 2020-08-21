@@ -237,6 +237,69 @@ function benchmark_correlate()
     CSV.write("data/correlate.csv", results)
 end
 
+function benchmark_tracking_loop()
+    #init signals
+    carrier_doppler = 200Hz
+    start_code_phase = 100
+    code_frequency = carrier_doppler / 1540 + 1023kHz
+    sampling_frequency = 4MHz
+    prn = 1
+    range = 0:3999
+    start_carrier_phase = π / 2
+    cpustate = TrackingState(GPSL1, carrier_doppler - 20Hz, start_code_phase)
+    gpustate = gpuTrackingState(GPSL1, carrier_doppler - 20Hz, start_code_phase)
+    sgpustate = sgpuTrackingState(GPSL1, carrier_doppler - 20Hz, start_code_phase)
+    cpusignal = cis.(
+            2π .* carrier_doppler .* range ./ sampling_frequency .+ start_carrier_phase
+        ) .*
+        GNSSSignals.get_code.(
+            GPSL1,
+            code_frequency .* range ./ sampling_frequency .+ start_code_phase,
+            prn
+        )
+    gpusignal = CuArray{ComplexF32}(cpusignal)
+    sgpusignal = StructArray{ComplexF32}((real(gpusignal),imag(gpusignal)))
+    #init data frame
+    results = DataFrame(
+        Samples = SAMPLES, 
+        sCPU_median = zeros(Float32,length(SAMPLES)),
+        GPU_median = zeros(Float32,length(SAMPLES)),
+        sGPU_median = zeros(Float32,length(SAMPLES))
+    )
+    counter = Int32(1)
+    for N in SAMPLES
+        println("Benchmarking the tracking loop on CPU: StructArray{ComplexF32}(Array, Array) ", N," samples...")
+        result = median(@benchmark Tracking.track(
+            $cpusignal,
+            $cpustate,
+            $prn,
+            $sampling_frequency,
+        )).time
+        println(result)
+        results.sCPU_median[counter] = result
+        println("Benchmarking the tracking loop on GPU: CuArray{ComplexF32} ", N, " samples...")
+        result = median(@benchmark gpu_track(
+            $gpusignal,
+            $gpustate,
+            $prn,
+            $sampling_frequency,
+        )).time
+        println(result)
+        results.GPU_median[counter] = result
+        println("Benchmarking the tracking loop GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples...")
+        result = median(@benchmark Tracking.track(
+            $sgpusignal,
+            $sgpustate,
+            $prn,
+            $sampling_frequency,
+        )).time
+        println(result)
+        results.sGPU_median[counter] = result
+        counter += 1
+    end
+    CSV.write("data/tracking_loop.csv", results)
+end
+
 function main()
     println("Executing all benchmarks")
     benchmark_downconvert();
