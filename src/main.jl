@@ -239,16 +239,16 @@ end
 
 function benchmark_tracking_loop()
     #init signals
-    carrier_doppler = 200Hz
-    start_code_phase = 100
-    code_frequency = carrier_doppler / 1540 + 1023kHz
-    sampling_frequency = 4MHz
+    carrier_doppler = 0Hz
+    start_code_phase = 0
+    code_frequency = 1023kHz
+    sampling_frequency = 2.5MHz
     prn = 1
-    range = 0:3999
-    start_carrier_phase = π / 2
-    cpustate = TrackingState(GPSL1, carrier_doppler - 20Hz, start_code_phase)
-    gpustate = gpuTrackingState(GPSL1, carrier_doppler - 20Hz, start_code_phase)
-    sgpustate = sgpuTrackingState(GPSL1, carrier_doppler - 20Hz, start_code_phase)
+    range = 0:MAX_NUM_SAMPLES
+    start_carrier_phase = 0
+    cpustate = TrackingState(GPSL1, carrier_doppler, start_code_phase)
+    gpustate = gpuTrackingState(GPSL1, carrier_doppler, start_code_phase)
+    sgpustate = sgpuTrackingState(GPSL1, carrier_doppler, start_code_phase)
     cpusignal = cis.(
             2π .* carrier_doppler .* range ./ sampling_frequency .+ start_carrier_phase
         ) .*
@@ -270,7 +270,7 @@ function benchmark_tracking_loop()
     for N in SAMPLES
         println("Benchmarking the tracking loop on CPU: StructArray{ComplexF32}(Array, Array) ", N," samples...")
         result = median(@benchmark Tracking.track(
-            $cpusignal,
+            $cpusignal[1:$N],
             $cpustate,
             $prn,
             $sampling_frequency,
@@ -279,7 +279,7 @@ function benchmark_tracking_loop()
         results.sCPU_median[counter] = result
         println("Benchmarking the tracking loop on GPU: CuArray{ComplexF32} ", N, " samples...")
         result = median(@benchmark gpu_track(
-            $gpusignal,
+            $gpusignal[1:$N],
             $gpustate,
             $prn,
             $sampling_frequency,
@@ -288,7 +288,7 @@ function benchmark_tracking_loop()
         results.GPU_median[counter] = result
         println("Benchmarking the tracking loop GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples...")
         result = median(@benchmark Tracking.track(
-            $sgpusignal,
+            $sgpusignal[1:$N],
             $sgpustate,
             $prn,
             $sampling_frequency,
