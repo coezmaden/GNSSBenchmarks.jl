@@ -8,7 +8,8 @@ module GNSSBenchmarks
         Tracking,
         TrackingLoopFilters,
         GNSSSignals,
-        DataFrames
+        DataFrames,
+        Plots
 
     using Unitful: upreferred, Hz, dBHz, ms, kHz, MHz
     
@@ -36,11 +37,13 @@ module GNSSBenchmarks
 
     export
         main,
+        plotall,
         benchmark_downconvert,
         benchmark_carrier_replica,
         benchmark_code_replica,
         benchmark_correlate,
-        benchmark_tracking_loop
+        benchmark_tracking_loop,
+        plot_carrier_replica
 
     include("main.jl")
     include("gpu_downconvert.jl")
