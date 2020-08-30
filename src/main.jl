@@ -171,7 +171,7 @@ function benchmark_correlate()
     #init signals
     correlator = EarlyPromptLateCorrelator(0.0 + 0.0im, 0.0 + 0.0im, 0.0 + 0.0im)
     early_late_sample_shift = 1
-    cpucode = get_code.(
+    cpucode = GNSSSignals.get_code.(
             GPSL1,
             (1 - early_late_sample_shift:MAX_NUM_SAMPLES + early_late_sample_shift) * 1023e3 / 2.5e6,
             1
@@ -244,17 +244,16 @@ function benchmark_tracking_loop()
     code_frequency = 1023kHz
     sampling_frequency = 2.5MHz
     prn = 1
-    range = 0:MAX_NUM_SAMPLES
     start_carrier_phase = 0
-    cpustate = TrackingState(GPSL1, carrier_doppler, start_code_phase)
-    gpustate = gpuTrackingState(GPSL1, carrier_doppler, start_code_phase)
-    sgpustate = sgpuTrackingState(GPSL1, carrier_doppler, start_code_phase)
+    cpustate = Tracking.TrackingState(GPSL1, carrier_doppler, start_code_phase)
+    gpustate = GNSSBenchmarks.gpuTrackingState(GPSL1, carrier_doppler, start_code_phase)
+    sgpustate = GNSSBenchmarks.sgpuTrackingState(GPSL1, carrier_doppler, start_code_phase)
     cpusignal = cis.(
-            2π .* carrier_doppler .* range ./ sampling_frequency .+ start_carrier_phase
+            2π .* carrier_doppler .* (1:MAX_NUM_SAMPLES) ./ sampling_frequency .+ start_carrier_phase
         ) .*
         GNSSSignals.get_code.(
             GPSL1,
-            code_frequency .* range ./ sampling_frequency .+ start_code_phase,
+            code_frequency .* (1:MAX_NUM_SAMPLES) ./ sampling_frequency .+ start_code_phase,
             prn
         )
     gpusignal = CuArray{ComplexF32}(cpusignal)

@@ -3,12 +3,12 @@ function gpu_track(
     state::GNSSBenchmarks.gpuTrackingState{S, C, CALF, COLF, CN, DS},
     prn::Integer,
     sampling_frequency;
-    post_corr_filter = get_default_post_corr_filter(get_correlator(state)),
+    post_corr_filter = get_default_post_corr_filter(GNSSBenchmarks.get_correlator(state)),
     intermediate_frequency = 0.0Hz,
     max_integration_time::typeof(1ms) = 1ms,
     min_integration_time::typeof(1.0ms) = 0.75ms,
     early_late_sample_shift = get_early_late_sample_shift(S,
-        get_correlator(state), sampling_frequency, 0.5),
+        GNSSBenchmarks.get_correlator(state), sampling_frequency, 0.5),
     carrier_loop_filter_bandwidth = 18Hz,
     code_loop_filter_bandwidth = 1Hz,
     velocity_aiding = 0Hz,
@@ -19,13 +19,13 @@ C <: AbstractCorrelator,
 CALF <: AbstractLoopFilter,
 COLF <: AbstractLoopFilter,
 CN <: AbstractCN0Estimator,
-DS <: Union{CuArray, StructArray},
+DS <: CuArray,
 N
 }
 correlator = GNSSBenchmarks.get_correlator(state)
-downconverted_signal = resize!(get_downconverted_signal(state), size(signal, 1))
-carrier_replica = resize!(get_carrier(state), size(signal, 1))
-code_replica = resize!(get_code(state), size(signal, 1) + 2 * maximum(early_late_sample_shift))
+downconverted_signal = resize!(GNSSBenchmarks.get_downconverted_signal(state), size(signal, 1))
+carrier_replica = resize!(GNSSBenchmarks.get_carrier(state), size(signal, 1))
+code_replica = resize!(GNSSBenchmarks.get_code(state), size(signal, 1) + 2 * maximum(early_late_sample_shift))
 init_carrier_doppler = GNSSBenchmarks.get_init_carrier_doppler(state)
 init_code_doppler = GNSSBenchmarks.get_init_code_doppler(state)
 carrier_doppler = GNSSBenchmarks.get_carrier_doppler(state)
@@ -148,7 +148,7 @@ while true
             code_freq_update,
             velocity_aiding
         )
-        cn0_estimator = Tracking.update(cn0_estimator, get_prompt(filtered_correlator))
+        cn0_estimator = Tracking.update(cn0_estimator, Tracking.get_prompt(filtered_correlator))
         bit_buffer, prompt_accumulator = Tracking.buffer(
             S,
             bit_buffer,
@@ -157,9 +157,9 @@ while true
             prev_code_phase,
             code_phase,
             max_integration_time,
-            get_prompt(filtered_correlator)
+            Tracking.get_prompt(filtered_correlator)
         )
-        sc_bit_detector = Tracking.find(S, sc_bit_detector, get_prompt(filtered_correlator))
+        sc_bit_detector = Tracking.find(S, sc_bit_detector, Tracking.get_prompt(filtered_correlator))
         correlator = zero(correlator)
         integrated_samples = 0
     end

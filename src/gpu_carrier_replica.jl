@@ -24,7 +24,7 @@ function gpu_gen_carrier_replica!(
     start_sample,
     num_samples
 )
-    @. carrier_replica = cis(2pi * (1:num_samples) * carrier_frequency / sampling_frequency + start_phase)
+    @. @views carrier_replica[start_sample:num_samples] = cis(2pi * (1:num_samples) * carrier_frequency / sampling_frequency + start_phase)
 end
 
 # Float32 implementation of the orig. CPU function
