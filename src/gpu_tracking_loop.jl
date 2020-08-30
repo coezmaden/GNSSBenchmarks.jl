@@ -3,12 +3,12 @@ function gpu_track(
     state::GNSSBenchmarks.gpuTrackingState{S, C, CALF, COLF, CN, DS},
     prn::Integer,
     sampling_frequency;
-    post_corr_filter = get_default_post_corr_filter(GNSSBenchmarks.get_correlator(state)),
+    post_corr_filter = get_default_post_corr_filter(gpu_get_correlator(state)),
     intermediate_frequency = 0.0Hz,
     max_integration_time::typeof(1ms) = 1ms,
     min_integration_time::typeof(1.0ms) = 0.75ms,
     early_late_sample_shift = get_early_late_sample_shift(S,
-        GNSSBenchmarks.get_correlator(state), sampling_frequency, 0.5),
+        gpu_get_correlator(state), sampling_frequency, 0.5),
     carrier_loop_filter_bandwidth = 18Hz,
     code_loop_filter_bandwidth = 1Hz,
     velocity_aiding = 0Hz,
@@ -22,22 +22,22 @@ CN <: AbstractCN0Estimator,
 DS <: CuArray,
 N
 }
-correlator = GNSSBenchmarks.get_correlator(state)
-downconverted_signal = resize!(GNSSBenchmarks.get_downconverted_signal(state), size(signal, 1))
-carrier_replica = resize!(GNSSBenchmarks.get_carrier(state), size(signal, 1))
-code_replica = resize!(GNSSBenchmarks.get_code(state), size(signal, 1) + 2 * maximum(early_late_sample_shift))
-init_carrier_doppler = GNSSBenchmarks.get_init_carrier_doppler(state)
-init_code_doppler = GNSSBenchmarks.get_init_code_doppler(state)
-carrier_doppler = GNSSBenchmarks.get_carrier_doppler(state)
-code_doppler = GNSSBenchmarks.get_code_doppler(state)
-carrier_phase = GNSSBenchmarks.get_carrier_phase(state)
-code_phase = GNSSBenchmarks.get_code_phase(state)
-sc_bit_detector = GNSSBenchmarks.get_sc_bit_detector(state)
-carrier_loop_filter = GNSSBenchmarks.get_carrier_loop_filter(state)
-code_loop_filter = GNSSBenchmarks.get_code_loop_filter(state)
-prompt_accumulator = GNSSBenchmarks.get_prompt_accumulator(state)
-integrated_samples = GNSSBenchmarks.get_integrated_samples(state)
-cn0_estimator = GNSSBenchmarks.get_cn0_estimator(state)
+correlator = gpu_get_correlator(state)
+downconverted_signal = resize!(gpu_get_downconverted_signal(state), size(signal, 1))
+carrier_replica = resize!(gpu_get_carrier(state), size(signal, 1))
+code_replica = resize!(gpu_get_code(state), size(signal, 1) + 2 * maximum(early_late_sample_shift))
+init_carrier_doppler = GNSSBenchmarks.gpu_get_init_carrier_doppler(state)
+init_code_doppler = GNSSBenchmarks.gpu_get_init_code_doppler(state)
+carrier_doppler = GNSSBenchmarks.gpu_get_carrier_doppler(state)
+code_doppler = GNSSBenchmarks.gpu_get_code_doppler(state)
+carrier_phase = GNSSBenchmarks.gpu_get_carrier_phase(state)
+code_phase = GNSSBenchmarks.gpu_get_code_phase(state)
+sc_bit_detector = GNSSBenchmarks.gpu_get_sc_bit_detector(state)
+carrier_loop_filter = GNSSBenchmarks.gpu_get_carrier_loop_filter(state)
+code_loop_filter = GNSSBenchmarks.gpu_get_code_loop_filter(state)
+prompt_accumulator = GNSSBenchmarks.gpu_get_prompt_accumulator(state)
+integrated_samples = GNSSBenchmarks.gpu_get_integrated_samples(state)
+cn0_estimator = GNSSBenchmarks.gpu_get_cn0_estimator(state)
 signal_start_sample = 1
 bit_buffer = Tracking.BitBuffer()
 valid_correlator = zero(correlator)
@@ -69,7 +69,7 @@ while true
         early_late_sample_shift,
         prn
     )
-    carrier_replica = gpu_gen_carrier_replica!(
+    carrier_replica = GNSSBenchmarks.gpu_gen_carrier_replica!(
         carrier_replica,
         carrier_frequency,
         sampling_frequency,
@@ -78,14 +78,14 @@ while true
         signal_start_sample,
         num_samples_left
     )
-    downconverted_signal = gpu_downconvert!(
+    downconverted_signal = GNSSBenchmarks.gpu_downconvert!(
         downconverted_signal,
         signal,
         carrier_replica,
         signal_start_sample,
         num_samples_left
     )
-    correlator = gpu_correlate(
+    correlator = GNSSBenchmarks.gpu_correlate(
         correlator,
         downconverted_signal,
         code_replica,
@@ -167,7 +167,7 @@ while true
     num_samples_left == signal_samples_left && break
     signal_start_sample += num_samples_left
 end
-next_state = gpuTrackingState{S, C, CALF, COLF, CN, DS}(
+next_state = GNSSBenchmarks.gpuTrackingState{S, C, CALF, COLF, CN, DS}(
     init_carrier_doppler,
     init_code_doppler,
     carrier_doppler,

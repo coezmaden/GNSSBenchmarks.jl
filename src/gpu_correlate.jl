@@ -23,11 +23,10 @@ function gpu_correlate(
         early = early + (downconverted_signal_re[i] + 1im * downconverted_signal_im[i]) * code[i + 2 * early_late_sample_shift]
     end
     EarlyPromptLateCorrelator(
-        get_early(correlator) + early,
-        get_prompt(correlator) + prompt,
-        get_late(correlator) + late 
+        Tracking.get_early(correlator) + early,
+        Tracking.get_prompt(correlator) + prompt,
+        Tracking.get_late(correlator) + late 
     )
-
 end
 
 function gpu_correlate(
@@ -58,9 +57,9 @@ function gpu_correlate(
                 + 1im*downconverted_signal_im[start_sample:num_samples_left + start_sample - 1]),
                 code[(start_sample:num_samples_left + start_sample - 1) .+ 2 * early_late_sample_shift])
     EarlyPromptLateCorrelator(
-        get_early(correlator) + early, 
-        get_prompt(correlator) + prompt,
-        get_late(correlator) + late
+        Tracking.get_early(correlator) + early, 
+        Tracking.get_prompt(correlator) + prompt,
+        Tracking.get_late(correlator) + late
     )
 end
 

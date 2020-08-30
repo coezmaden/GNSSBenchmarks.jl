@@ -134,7 +134,7 @@ function benchmark_code_replica()
     )
     counter = Int32(1)
     for N in SAMPLES
-        println("Benchmarking code_replica on CPU: Array{ComplexF32}")
+        println("Benchmarking code_replica on CPU: Array{ComplexF32} ", N, " samples...")
         result = median(@benchmark Tracking.gen_code_replica!(
             $cpucode[1:$N],
             $GPSL1,
@@ -148,7 +148,7 @@ function benchmark_code_replica()
         )).time
         println(result)
         results.CPU_median[counter] = result
-        println("Benchmarking code_replica on GPU: CuArray{ComplexF32}")
+        println("Benchmarking code_replica on GPU: CuArray{ComplexF32} ", N, " samples...")
         result = median(@benchmark CUDA.@sync gpu_gen_code_replica!(
             $gpucode[1:$N],
             $GPSL1,
@@ -248,16 +248,6 @@ function benchmark_tracking_loop()
     cpustate = Tracking.TrackingState(GPSL1, carrier_doppler, start_code_phase)
     gpustate = GNSSBenchmarks.gpuTrackingState(GPSL1, carrier_doppler, start_code_phase)
     sgpustate = GNSSBenchmarks.sgpuTrackingState(GPSL1, carrier_doppler, start_code_phase)
-    cpusignal = cis.(
-            2π .* carrier_doppler .* (1:MAX_NUM_SAMPLES) ./ sampling_frequency .+ start_carrier_phase
-        ) .*
-        GNSSSignals.get_code.(
-            GPSL1,
-            code_frequency .* (1:MAX_NUM_SAMPLES) ./ sampling_frequency .+ start_code_phase,
-            prn
-        )
-    gpusignal = CuArray{ComplexF32}(cpusignal)
-    sgpusignal = StructArray{ComplexF32}((real(gpusignal),imag(gpusignal)))
     #init data frame
     results = DataFrame(
         Samples = SAMPLES, 
@@ -267,9 +257,17 @@ function benchmark_tracking_loop()
     )
     counter = Int32(1)
     for N in SAMPLES
+        cpusignal = cis.(
+            2π .* carrier_doppler .* (1:N) ./ sampling_frequency .+ start_carrier_phase
+        ) .*
+        GNSSSignals.get_code.(
+            GPSL1,
+            code_frequency .* (1:N) ./ sampling_frequency .+ start_code_phase,
+            prn
+        )
         println("Benchmarking the tracking loop on CPU: StructArray{ComplexF32}(Array, Array) ", N," samples...")
         result = median(@benchmark Tracking.track(
-            $cpusignal[1:$N],
+            $cpusignal,
             $cpustate,
             $prn,
             $sampling_frequency,
@@ -278,7 +276,7 @@ function benchmark_tracking_loop()
         results.sCPU_median[counter] = result
         println("Benchmarking the tracking loop on GPU: CuArray{ComplexF32} ", N, " samples...")
         result = median(@benchmark gpu_track(
-            $gpusignal[1:$N],
+            CuArray{ComplexF32}(cpusignal),
             $gpustate,
             $prn,
             $sampling_frequency,
@@ -287,7 +285,9 @@ function benchmark_tracking_loop()
         results.GPU_median[counter] = result
         println("Benchmarking the tracking loop GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples...")
         result = median(@benchmark Tracking.track(
-            $sgpusignal[1:$N],
+            StructArray{ComplexF32}(
+                (real(CuArray{ComplexF32}(cpusignal)),
+                imag(CuArray{ComplexF32}(cpusignal)))),
             $sgpustate,
             $prn,
             $sampling_frequency,
