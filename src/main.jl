@@ -9,4 +9,7 @@ end
 function plotall()
     println("Plotting all the .csv benchmarks under /data ...")
     plot_carrier_replica()
+    plot_downconvert()
+    plot_code_replica()
+    plot_correlate()
 end

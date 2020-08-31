@@ -46,6 +46,7 @@ module GNSSBenchmarks
         plot_carrier_replica
 
     include("main.jl")
+    include("plot.jl")
     include("gpu_downconvert.jl")
     include("gpu_carrier_replica.jl")
     include("gpu_code_replica.jl")
