@@ -21,7 +21,7 @@ function benchmark_downconvert()
     counter = Int32(1)
     for N in SAMPLES
         println("Benchmarking downconvert on CPU: StructArray{ComplexF32} ", N," samples...")
-        result = median(@benchmark gpu_downconvert!(
+        result = 1000 * median(@benchmark gpu_downconvert!(
             $scpudwnsignal.re,
             $scpudwnsignal.im,
             $scpucarrier.re,
@@ -34,7 +34,7 @@ function benchmark_downconvert()
         println(result)
         results.sCPU_median[counter] = result
         println("Benchmarking downconvert on GPU: CuArray{ComplexF32} ", N, " samples...")
-        result = median(@benchmark CUDA.@sync gpu_downconvert!(
+        result = 1000 * median(@benchmark CUDA.@sync gpu_downconvert!(
             $gpudwnsignal,
             $gpucarrier,
             $gpusignal,
@@ -44,7 +44,7 @@ function benchmark_downconvert()
         println(result)
         results.GPU_median[counter] = result
         println("Benchmarking downconvert on GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples...")
-        result = median(@benchmark CUDA.@sync gpu_downconvert!(
+        result = 1000 * median(@benchmark CUDA.@sync gpu_downconvert!(
             $sgpudwnsignal.re,
             $sgpudwnsignal.im,
             $sgpucarrier.re,

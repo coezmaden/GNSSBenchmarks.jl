@@ -22,7 +22,7 @@ function benchmark_correlate()
     counter = Int32(1)
     for N in SAMPLES
         println("Benchmarking the correlator on CPU: StructArray{ComplexF32}(Array, Array) ", N," samples...")
-        result = median(@benchmark gpu_correlate(
+        result = 1000 * median(@benchmark gpu_correlate(
             $correlator,
             $scpudwnsignal[1:$N],
             $cpucode,
@@ -36,7 +36,7 @@ function benchmark_correlate()
         println(result)
         results.sCPU_median[counter] = result
         println("Benchmarking the correlator on GPU: CuArray{ComplexF32} ", N, " samples...")
-        result = median(@benchmark CUDA.@sync gpu_correlate(
+        result = 1000 * median(@benchmark CUDA.@sync gpu_correlate(
             $correlator,
             $gpudwnsignal[1:$N],
             $gpucode,
@@ -50,7 +50,7 @@ function benchmark_correlate()
         println(result)
         results.GPU_median[counter] = result
         println("Benchmarking the correlator on GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples...")
-        result = median(@benchmark CUDA.@sync gpu_correlate(
+        result = 1000 * median(@benchmark CUDA.@sync gpu_correlate(
             $correlator,
             $sgpudwnsignal[1:$N],
             $gpucode,

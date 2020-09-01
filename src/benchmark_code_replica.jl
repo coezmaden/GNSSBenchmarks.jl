@@ -17,7 +17,7 @@ function benchmark_code_replica()
     counter = Int32(1)
     for N in SAMPLES
         println("Benchmarking code_replica on CPU: Array{ComplexF32} ", N, " samples...")
-        result = median(@benchmark Tracking.gen_code_replica!(
+        result = 1000 * median(@benchmark Tracking.gen_code_replica!(
             $cpucode[1:$N],
             $GPSL1,
             $code_frequency,
@@ -31,7 +31,7 @@ function benchmark_code_replica()
         println(result)
         results.CPU_median[counter] = result
         println("Benchmarking code_replica on GPU: CuArray{ComplexF32} ", N, " samples...")
-        result = median(@benchmark CUDA.@sync gpu_gen_code_replica!(
+        result = 1000 * median(@benchmark CUDA.@sync gpu_gen_code_replica!(
             $gpucode[1:$N],
             $GPSL1,
             $code_frequency,
