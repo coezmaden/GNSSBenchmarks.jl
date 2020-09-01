@@ -9,7 +9,7 @@ module GNSSBenchmarks
         TrackingLoopFilters,
         GNSSSignals,
         DataFrames,
-        Plots
+        PGFPlotsX
 
     using Unitful: upreferred, Hz, dBHz, ms, kHz, MHz
     
