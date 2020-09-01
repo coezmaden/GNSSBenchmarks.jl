@@ -13,7 +13,7 @@ function benchmark_carrier_replica()
     counter = Int32(1)
     for N in SAMPLES
         println("Benchmarking carrier_replica on CPU: Array{ComplexF32} ", N," samples...")
-        result = 1000 * median(@benchmark gpu_gen_carrier_replica!(
+        result = 1000 / median(@benchmark gpu_gen_carrier_replica!(
             $cpucarrier[1:$N],
             1500,
             2.5e6,
@@ -25,7 +25,7 @@ function benchmark_carrier_replica()
         println(result)
         results.sCPU_median[counter] = result
         println("Benchmarking carrier_replica on GPU: CuArray{ComplexF32} ", N, " samples...")
-        result = 1000 * median(@benchmark gpu_gen_carrier_replica!(
+        result = 1000 / median(@benchmark gpu_gen_carrier_replica!(
             $gpucarrier[1:$N],
             1500,
             2.5e6,
@@ -37,7 +37,7 @@ function benchmark_carrier_replica()
         println(result)
         results.GPU_median[counter] = result
         println("Benchmarking carrier_replica on GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples...")
-        result = 1000 * median(@benchmark gpu_gen_carrier_replica!(
+        result = 1000 / median(@benchmark gpu_gen_carrier_replica!(
             $sgpucarrier[1:$N],
             1500,
             2.5e6,
@@ -50,5 +50,5 @@ function benchmark_carrier_replica()
         results.sGPU_median[counter] = result
         counter += 1
     end
-    CSV.write("data/carrier_replica.csv", results)
+    CSV.write("data/carrierreplica.csv", results)
 end
