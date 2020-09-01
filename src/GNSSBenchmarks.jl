@@ -47,6 +47,10 @@ module GNSSBenchmarks
 
     include("main.jl")
     include("plot.jl")
+    include("benchmark_carrier_replica.jl")
+    include("benchmark_code_replica.jl")
+    include("benchmark_downconvert.jl")
+    include("benchmark_gpu_tracking_loop.jl")
     include("gpu_downconvert.jl")
     include("gpu_carrier_replica.jl")
     include("gpu_code_replica.jl")
