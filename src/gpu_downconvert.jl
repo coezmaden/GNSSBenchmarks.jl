@@ -11,6 +11,19 @@ function gpu_downconvert!(
             conj(carrier[start_sample:num_samples_left + start_sample - 1])
 end
 
+# CuArray{ComplexF32}
+function gpu_downconvert!(
+    downconverted_signal::CuArray{ComplexF32},
+    carrier::CuArray{ComplexF32},
+    signal::CuArray{ComplexF32},
+    start_sample::Integer,
+    num_samples_left::Integer
+)
+    @. @views downconverted_signal[start_sample:num_samples_left + start_sample - 1] =
+            signal[start_sample:num_samples_left + start_sample - 1] * 
+            conj(carrier[start_sample:num_samples_left + start_sample - 1])
+end
+
 # StructArray of CuArrays
 function gpu_downconvert!(
     downconverted_signal_re::CuArray{Float32},
