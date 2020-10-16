@@ -31,7 +31,7 @@ function plot_carrier_replica()
     println("Saved the carrierreplica plot under /plots")
 end
 
-function plot_downconvert_cpu_gpu(data=DataFrame!(CSV.File("data/downconvert.csv")), targetdirtex="plots/downconvert.tex", targetdirpng="plots/downconvert.png")
+function plot_downconvert(data=DataFrame!(CSV.File("data/downconvert.csv")), targetdirtex="plots/downconvert.tex", targetdirpng="plots/downconvert.png")
     println("Plotting the downconvert benhcmarks...")
     pgfplot = @pgf TikzPicture(
         Axis({
