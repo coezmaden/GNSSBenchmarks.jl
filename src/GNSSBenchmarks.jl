@@ -62,4 +62,5 @@ module GNSSBenchmarks
 
     const MAX_NUM_SAMPLES = 50000
     const SAMPLES = StepRange(2500,2500,MAX_NUM_SAMPLES)
+    const ANTENNA = [1, 4, 16]
 end
