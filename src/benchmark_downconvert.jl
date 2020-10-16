@@ -63,7 +63,7 @@ function benchmark_downconvert()
 
             # do the benchmark
             println("Benchmarking downconvert on CPU: StructArray{ComplexF32} ", N," samples, ", M, " antenna...")
-            result = 1000 / median(@benchmark cpu_downconvert!(
+            result = median(@benchmark cpu_downconvert!(
                 $scpudwnsignal.re,
                 $scpudwnsignal.im,
                 $scpucarrier.re,
@@ -76,7 +76,7 @@ function benchmark_downconvert()
             println(result)
             results[rowpos, columnpos] = result
             println("Benchmarking downconvert on GPU: CuArray{ComplexF32} ", N, " samples, ", M, " antenna...")
-            result = 1000 / median(@benchmark CUDA.@sync gpu_downconvert!(
+            result = median(@benchmark CUDA.@sync gpu_downconvert!(
                 $gpudwnsignal,
                 $gpucarrier,
                 $gpusignal,
@@ -86,7 +86,7 @@ function benchmark_downconvert()
             println(result)
             results[rowpos, columnpos+3] = result
             println("Benchmarking downconvert on GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples, ", M, " antenna...")
-            result = 1000 / median(@benchmark CUDA.@sync gpu_downconvert!(
+            result = median(@benchmark CUDA.@sync gpu_downconvert!(
                 $sgpudwnsignal.re,
                 $sgpudwnsignal.im,
                 $sgpucarrier.re,

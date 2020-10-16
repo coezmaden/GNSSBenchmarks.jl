@@ -31,37 +31,129 @@ function plot_carrier_replica()
     println("Saved the carrierreplica plot under /plots")
 end
 
-function plot_downconvert()
+function plot_downconvert_cpu_gpu(data=DataFrame!(CSV.File("data/downconvert.csv")), targetdirtex="plots/downconvert.tex", targetdirpng="plots/downconvert.png")
     println("Plotting the downconvert benhcmarks...")
-    data = DataFrame!(CSV.File("data/downconvert.csv"))
     pgfplot = @pgf TikzPicture(
         Axis({
             xlabel = "Samples",
-            ylabel = "Zeit / us",
-            title = "Zeit für downconvert mit einer Antenne",
+            ylabel = "Zeit / s",
+            ymode = "log",
+            title = "Zeit für downconvert",
             xmajorgrids,
             ymajorgrids,
             scaled_ticks = "false",
-            legend_pos = "north west"
+            legend_pos = "north west",
             },
             PlotInc({
                 blue,
                 mark="|",
                 thin
-            }, 
-            Coordinates(data.Samples, data.sCPU_median)),
+            }, Coordinates(data.Samples, 10^(-9)*data.sCPU_median_1ant)),
+            PlotInc({
+                blue,
+                mark="|",
+                thin
+            }, Coordinates(data.Samples, 10^(-9)*data.sCPU_median_4ant)),
+            PlotInc({
+                blue,
+                mark="|",
+                thin
+            }, Coordinates(data.Samples, 10^(-9)*data.sCPU_median_16ant)),
             PlotInc({
                 red,
-                mark="x",
+                mark="|",
                 thin
-            },
-            Coordinates(data.Samples, data.GPU_median)),
-            Legend(["CPU median","GPU median"])
+            },Coordinates(data.Samples, 10^(-9)*data.GPU_median_1ant)),
+            PlotInc({
+                red,
+                mark="|",
+                thin
+            },Coordinates(data.Samples, 10^(-9)*data.GPU_median_4ant)),
+            PlotInc({
+                red,
+                mark="|",
+                thin
+            },Coordinates(data.Samples, 10^(-9)*data.GPU_median_16ant)),
+            # PlotInc({
+            #     gray,
+            #     mark="|",
+            #     thin
+            # },Coordinates(data.Samples, 10^(-9)*data.sGPU_median_1ant)),
+            # PlotInc({
+            #     gray,
+            #     mark="|",
+            #     thin
+            # },Coordinates(data.Samples, 10^(-9)*data.sGPU_median_4ant)),
+            # PlotInc({
+            #     gray,
+            #     mark="|",
+            #     thin
+            # },Coordinates(data.Samples, 10^(-9)*data.sGPU_median_16ant)),
+            Legend([
+            "CPU median Ant=1","CPU median Ant=4","CPU median Ant=16",
+            "GPU median Ant=1","GPU median Ant=4","GPU median Ant=16",
+            #"sGPU median Ant=1","sGPU median Ant=4","sGPU median Ant=16"
+            ])
         )
     )
-    pgfsave("plots/downconvert.tex", pgfplot) 
-    pgfsave("plots/downconvert.png", pgfplot, dpi = 300)
-    println("Saved the downconvert plot under /plots")
+    pgfsave(targetdirtex, pgfplot) 
+    pgfsave(targetdirpng, pgfplot, dpi = 300)
+    println("Saved the downconvert plot under", targetdirtex)
+end
+
+function plot_downconvert_gpu_gpu(data=DataFrame!(CSV.File("data/downconvert.csv")), targetdirtex="plots/downconvert.tex", targetdirpng="plots/downconvert.png")
+    println("Plotting the downconvert benhcmarks...")
+    pgfplot = @pgf TikzPicture(
+        Axis({
+            xlabel = "Samples",
+            ylabel = "Zeit / s",
+            ymode = "log",
+            title = "Zeit für downconvert",
+            xmajorgrids,
+            ymajorgrids,
+            scaled_ticks = "false",
+            legend_pos = "outer north east",
+            },
+            PlotInc({
+                red,
+                mark="|",
+                thin
+            },Coordinates(data.Samples, 10^(-9)*data.GPU_median_1ant)),
+            PlotInc({
+                red,
+                mark="|",
+                thin
+            },Coordinates(data.Samples, 10^(-9)*data.GPU_median_4ant)),
+            PlotInc({
+                red,
+                mark="|",
+                thin
+            },Coordinates(data.Samples, 10^(-9)*data.GPU_median_16ant)),
+            PlotInc({
+                gray,
+                mark="|",
+                thin
+            },Coordinates(data.Samples, 10^(-9)*data.sGPU_median_1ant)),
+            PlotInc({
+                gray,
+                mark="|",
+                thin
+            },Coordinates(data.Samples, 10^(-9)*data.sGPU_median_4ant)),
+            PlotInc({
+                gray,
+                mark="|",
+                thin
+            },Coordinates(data.Samples, 10^(-9)*data.sGPU_median_16ant)),
+            Legend([
+            # "CPU median Ant=1","CPU median Ant=4","CPU median Ant=16",
+            "GPU median Ant=1","GPU median Ant=4","GPU median Ant=16",
+            "sGPU median Ant=1","sGPU median Ant=4","sGPU median Ant=16"
+            ])
+        )
+    )
+    pgfsave(targetdirtex, pgfplot) 
+    pgfsave(targetdirpng, pgfplot, dpi = 300)
+    println("Saved the downconvert plot under", targetdirtex)
 end
 
 function plot_correlate()
