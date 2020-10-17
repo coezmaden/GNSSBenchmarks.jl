@@ -1,15 +1,39 @@
 function benchmark_downconvert()
-    results = DataFrame(
+    results_min = DataFrame(
         Samples = SAMPLES, 
-        sCPU_median_1ant = zeros(Float64,length(SAMPLES)),
-        sCPU_median_4ant = zeros(Float64,length(SAMPLES)),
-        sCPU_median_16ant = zeros(Float64,length(SAMPLES)),
-        GPU_median_1ant = zeros(Float64,length(SAMPLES)),
-        GPU_median_4ant = zeros(Float64,length(SAMPLES)),
-        GPU_median_16ant = zeros(Float64,length(SAMPLES)),
-        sGPU_median_1ant = zeros(Float64,length(SAMPLES)),
-        sGPU_median_4ant = zeros(Float64,length(SAMPLES)),
-        sGPU_median_16ant = zeros(Float64,length(SAMPLES)) 
+        sCPU_time_1ant = zeros(Float64,length(SAMPLES)),
+        sCPU_time_4ant = zeros(Float64,length(SAMPLES)),
+        sCPU_time_16ant = zeros(Float64,length(SAMPLES)),
+        GPU_time_1ant = zeros(Float64,length(SAMPLES)),
+        GPU_time_4ant = zeros(Float64,length(SAMPLES)),
+        GPU_time_16ant = zeros(Float64,length(SAMPLES)),
+        sGPU_time_1ant = zeros(Float64,length(SAMPLES)),
+        sGPU_time_4ant = zeros(Float64,length(SAMPLES)),
+        sGPU_time_16ant = zeros(Float64,length(SAMPLES)) 
+    )
+    results_med = DataFrame(
+        Samples = SAMPLES, 
+        sCPU_time_1ant = zeros(Float64,length(SAMPLES)),
+        sCPU_time_4ant = zeros(Float64,length(SAMPLES)),
+        sCPU_time_16ant = zeros(Float64,length(SAMPLES)),
+        GPU_time_1ant = zeros(Float64,length(SAMPLES)),
+        GPU_time_4ant = zeros(Float64,length(SAMPLES)),
+        GPU_time_16ant = zeros(Float64,length(SAMPLES)),
+        sGPU_time_1ant = zeros(Float64,length(SAMPLES)),
+        sGPU_time_4ant = zeros(Float64,length(SAMPLES)),
+        sGPU_time_16ant = zeros(Float64,length(SAMPLES)) 
+    )
+    results_mean = DataFrame(
+        Samples = SAMPLES, 
+        sCPU_time_1ant = zeros(Float64,length(SAMPLES)),
+        sCPU_time_4ant = zeros(Float64,length(SAMPLES)),
+        sCPU_time_16ant = zeros(Float64,length(SAMPLES)),
+        GPU_time_1ant = zeros(Float64,length(SAMPLES)),
+        GPU_time_4ant = zeros(Float64,length(SAMPLES)),
+        GPU_time_16ant = zeros(Float64,length(SAMPLES)),
+        sGPU_time_1ant = zeros(Float64,length(SAMPLES)),
+        sGPU_time_4ant = zeros(Float64,length(SAMPLES)),
+        sGPU_time_16ant = zeros(Float64,length(SAMPLES)) 
     )
     rowpos = Int32(1)
     for N in SAMPLES
@@ -63,7 +87,7 @@ function benchmark_downconvert()
 
             # do the benchmark
             println("Benchmarking downconvert on CPU: StructArray{ComplexF32} ", N," samples, ", M, " antenna...")
-            result = median(@benchmark cpu_downconvert!(
+            result = @benchmark cpu_downconvert!(
                 $scpudwnsignal.re,
                 $scpudwnsignal.im,
                 $scpucarrier.re,
@@ -72,21 +96,25 @@ function benchmark_downconvert()
                 $scpusignal.im,
                 1,
                 $N
-            )).time
-            println(result)
-            results[rowpos, columnpos] = result
+            )
+            println(minimum(result).time)
+            results_min[rowpos, columnpos] = minimum(result).time
+            results_med[rowpos, columnpos] = median(result).time
+            results_mean[rowpos, columnpos] = mean(result).time
             println("Benchmarking downconvert on GPU: CuArray{ComplexF32} ", N, " samples, ", M, " antenna...")
-            result = median(@benchmark CUDA.@sync gpu_downconvert!(
+            result = @benchmark CUDA.@sync gpu_downconvert!(
                 $gpudwnsignal,
                 $gpucarrier,
                 $gpusignal,
                 1,
                 $N
-            )).time
-            println(result)
-            results[rowpos, columnpos+3] = result
+            )
+            println(minimum(result).time)
+            results_min[rowpos, columnpos+3] = minimum(result).time
+            results_med[rowpos, columnpos+3] = median(result).time
+            results_mean[rowpos, columnpos+3] = mean(result).time
             println("Benchmarking downconvert on GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples, ", M, " antenna...")
-            result = median(@benchmark CUDA.@sync gpu_downconvert!(
+            result = @benchmark CUDA.@sync gpu_downconvert!(
                 $sgpudwnsignal.re,
                 $sgpudwnsignal.im,
                 $sgpucarrier.re,
@@ -95,11 +123,15 @@ function benchmark_downconvert()
                 $sgpusignal.im,
                 1,
                 $N
-            )).time
-            println(result)
-            results[rowpos, columnpos+6] = result
+            )
+            println(minimum(result).time)
+            results_min[rowpos, columnpos+6] = minimum(result).time
+            results_med[rowpos, columnpos+6] = median(result).time
+            results_mean[rowpos, columnpos+6] = mean(result).time
         end
         rowpos += 1
     end
-    CSV.write("data/downconvert.csv", results)
+    CSV.write("data/downconvert_min.csv", results_min)
+    CSV.write("data/downconvert_med.csv", results_med)
+    CSV.write("data/downconvert_mean.csv", results_mean)
 end
