@@ -268,6 +268,277 @@ function plot_downconvert_gpu_gpu(data=DataFrame!(CSV.File("data/downconvert.csv
     println("Saved the downconvert plot under", targetdirtex)
 end
 
+function plot_downconvert_all(
+    datamin=DataFrame!(CSV.File("data/carrierreplica_min.csv")),
+    datamed=DataFrame!(CSV.File("data/carrierreplica_med.csv")),
+    datamean=DataFrame!(CSV.File("data/carrierreplica_mean.csv")),
+    targetdirtex="plots/carrierreplica_all.tex", 
+    targetdirpng="plots/carrierreplica_all.png"
+)
+    println("Plotting the carrier replica benhcmarks...")
+    push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"\usepgfplotslibrary{fillbetween}")
+    pgfplot = @pgf TikzPicture(
+        Axis({
+            xlabel = "Abtwastwerte",
+            ylabel = "Zeit / s",
+            ymode = "log",
+            title = "Laufzeit der donwconvert!",
+            xmajorgrids,
+            ymajorgrids,
+            scaled_ticks = "false",
+            legend_pos = "outer north east"
+            },
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                "name path=CPUmin1ant",
+                style ="{solid}",
+            }, Coordinates(data.Samples, 10^(-9)*datamin.sCPU_time_1ant)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            }, Coordinates(data.Samples, 10^(-9)*datamed.sCPU_time_1ant)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                "name path=CPUmean1ant",
+                style ="{dotted}",
+            }, Coordinates(data.Samples, 10^(-9)*datamean.sCPU_time_1ant)),
+            PlotInc({
+                thick, 
+                color = "blue", 
+                fill = "blue", 
+                opacity = 0.2 },
+            raw"fill between [of=CPUmin1ant and CPUmean1ant]"),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                "name path=CPUmin4ant",
+                style ="{solid}",
+            }, Coordinates(data.Samples, 10^(-9)*datamin.sCPU_time_4ant)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            }, Coordinates(data.Samples, 10^(-9)*datamed.sCPU_time_4ant)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                "name path=CPUmean4ant",
+                style ="{dotted}",
+            }, Coordinates(data.Samples, 10^(-9)*datamean.sCPU_time_4ant)),
+            PlotInc({
+                thick, 
+                color = "blue", 
+                fill = "blue", 
+                opacity = 0.2 },
+            raw"fill between [of=CPUmin4ant and CPUmean4ant]"),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                "name path=CPUmin16ant",
+                style ="{solid}",
+            }, Coordinates(data.Samples, 10^(-9)*datamin.sCPU_time_16ant)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            }, Coordinates(data.Samples, 10^(-9)*datamed.sCPU_time_16ant)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                "name path=CPUmean16ant",
+                style ="{dotted}",
+            }, Coordinates(data.Samples, 10^(-9)*datamean.sCPU_time_16ant)),
+            PlotInc({
+                thick, 
+                color = "blue", 
+                fill = "blue", 
+                opacity = 0.2 },
+            raw"fill between [of=CPUmin16ant and CPUmean16ant]"),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                "name path=GPUmin1ant",
+                style ="{solid}",
+            },Coordinates(data.Samples, 10^(-9)*datamin.GPU_time_1ant)),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            },Coordinates(data.Samples, 10^(-9)*datamed.GPU_time_1ant)),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                "name path=GPUmean1ant",
+                style ="{dotted}",
+            },Coordinates(data.Samples, 10^(-9)*datamean.GPU_time_1ant)),
+            PlotInc({
+                thick, 
+                color = "red", 
+                fill = "red", 
+                opacity = 0.2 },
+            raw"fill between [of=GPUmin1ant and GPUmean1ant]"),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                "name path=GPUmin4ant",
+                style ="{solid}",
+            },Coordinates(data.Samples, 10^(-9)*datamin.GPU_time_4ant)),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            },Coordinates(data.Samples, 10^(-9)*datamed.GPU_time_4ant)),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                "name path=GPUmean4ant",
+                style ="{dotted}",
+            },Coordinates(data.Samples, 10^(-9)*datamean.GPU_time_4ant)),
+            PlotInc({
+                thick, 
+                color = "red", 
+                fill = "red", 
+                opacity = 0.2 },
+            raw"fill between [of=GPUmin4ant and GPUmean4ant]"),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                "name path=GPUmin16ant",
+                style ="{solid}",
+            },Coordinates(data.Samples, 10^(-9)*datamin.GPU_time_16ant)),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            },Coordinates(data.Samples, 10^(-9)*datamed.GPU_time_16ant)),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                "name path=GPUmean16ant",
+                style ="{dotted}",
+            },Coordinates(data.Samples, 10^(-9)*datamean.GPU_time_16ant)),
+            PlotInc({
+                thick, 
+                color = "red", 
+                fill = "red", 
+                opacity = 0.2 },
+            raw"fill between [of=GPUmin16ant and GPUmean16ant]"),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                "name path=sGPUmin1ant",
+                style ="{solid}",
+            },Coordinates(data.Samples, 10^(-9)*datamin.sGPU_time_1ant)),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            },Coordinates(data.Samples, 10^(-9)*datamed.sGPU_time_1ant)),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                "name path=sGPUmean1ant",
+                style ="{dotted}",
+            },Coordinates(data.Samples, 10^(-9)*datamean.sGPU_time_1ant)),
+            PlotInc({
+                thick, 
+                color = "green", 
+                fill = "green", 
+                opacity = 0.2 },
+            raw"fill between [of=sGPUmin1ant and sGPUmean1ant]"),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                "name path=sGPUmin4ant",
+                style ="{solid}",
+            },Coordinates(data.Samples, 10^(-9)*datamin.sGPU_time_4ant)),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            },Coordinates(data.Samples, 10^(-9)*datamed.sGPU_time_4ant)),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                "name path=sGPUmean4ant",
+                style ="{dotted}",
+            },Coordinates(data.Samples, 10^(-9)*datamean.sGPU_time_4ant)),
+            PlotInc({
+                thick, 
+                color = "green", 
+                fill = "green", 
+                opacity = 0.2 },
+            raw"fill between [of=sGPUmin4ant and sGPUmean4ant]"),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                "name path=sGPUmin16ant",
+                style ="{solid}",
+            },Coordinates(data.Samples, 10^(-9)*datamin.sGPU_time_16ant)),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            },Coordinates(data.Samples, 10^(-9)*datamed.sGPU_time_16ant)),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                "name path=sGPUmean16ant",
+                style ="{dotted}",
+            },Coordinates(data.Samples, 10^(-9)*datamean.sGPU_time_16ant)),
+            PlotInc({
+                thick, 
+                color = "green", 
+                fill = "green", 
+                opacity = 0.2 },
+            raw"fill between [of=sGPUmin16ant and sGPUmean16ant]"),
+            Legend([
+                "StructArray CPU Minimum Ant=1", "StructArray CPU Median Ant=1", "StructArray CPU Mean Ant=1", "",
+                "StructArray CPU Minimum Ant=4", "StructArray CPU Median Ant=4", "StructArray CPU Mean Ant=4", "",
+                "StructArray CPU Minimum Ant=16", "StructArray CPU Median Ant=16", "StructArray CPU Mean Ant=16", "",
+                "CuArray GPU Minimum Ant=1", "CuArray GPU Median Ant=1", "CuArray GPU Mean Ant=1", "",
+                "CuArray GPU Minimum Ant=4", "CuArray GPU Median Ant=4", "CuArray GPU Mean Ant=4", "",
+                "CuArray GPU Minimum Ant=16", "CuArray GPU Median Ant=16", "CuArray GPU Mean Ant=16", "",
+                "StructArray GPU Minimum Ant=1", "StructArray GPU Median Ant=1", "StructArray GPU Mean Ant=1", "",
+                "StructArray GPU Minimum Ant=4", "StructArray GPU Median Ant=4", "StructArray GPU Mean Ant=4", "",
+                "StructArray GPU Minimum Ant=16", "StructArray GPU Median Ant=16", "StructArray GPU Mean Ant=16", ""])
+        )
+    )
+    pgfsave(targetdirtex, pgfplot) 
+    pgfsave(targetdirpng, pgfplot, dpi = 300)
+    println("Saved the downconvert plot")
+end
+
 function plot_correlate()
     println("Plotting the correlation benhcmarks...")
     data = DataFrame!(CSV.File("data/correlate.csv"))
