@@ -1,34 +1,146 @@
-function plot_carrier_replica()
+function plot_carrier_replica(data=DataFrame!(CSV.File("data/carrier_replica.csv")), targetdirtex="plots/carrier_replica.tex", targetdirpng="plots/carrier_replica.png")
     println("Plotting the carrier replica benhcmarks...")
-    data = DataFrame!(CSV.File("data/carrierreplica.csv"))
     pgfplot = @pgf TikzPicture(
         Axis({
             xlabel = "Samples",
             ylabel = "Zeit / us",
+            ymode = "log",
             title = "Zeit für carrierreplica mit einer Antenne",
             xmajorgrids,
             ymajorgrids,
             scaled_ticks = "false",
-            legend_pos = "north west"
+            legend_pos = "outer north east"
             },
             PlotInc({
                 blue,
                 mark="|",
                 thin
-            }, 
-            Coordinates(data.Samples, data.sCPU_median)),
+            }, Coordinates(data.Samples, 10^(-9)*data.sCPU_time)),
             PlotInc({
                 red,
                 mark="x",
                 thin
-            },
-            Coordinates(data.Samples, data.GPU_median)),
-            Legend(["CPU median","GPU median"])
+            },Coordinates(data.Samples, 10^(-9)*data.GPU_time)),
+            PlotInc({
+                green,
+                mark="x",
+                thin
+            },Coordinates(data.Samples, 10^(-9)*data.sGPU_time)),
+            Legend(["CPU","GPU","sGPU"])
         )
     )
-    pgfsave("plots/carrierreplica.tex", pgfplot) 
-    pgfsave("plots/carrierreplica.png", pgfplot, dpi = 300)
-    println("Saved the carrierreplica plot under /plots")
+    pgfsave(targetdirtex, pgfplot) 
+    pgfsave(targetdirpng, pgfplot, dpi = 300)
+    println("Saved the carrierreplica plot under ", targetdirtex)
+end
+
+function plot_carrier_replica_all(
+    datamin=DataFrame!(CSV.File("data/carrierreplica_min.csv")),
+    datamed=DataFrame!(CSV.File("data/carrierreplica_med.csv")),
+    datamean=DataFrame!(CSV.File("data/carrierreplica_mean.csv")),
+    targetdirtex="plots/carrierreplica_all.tex", 
+    targetdirpng="plots/carrierreplica_all.png"
+)
+    println("Plotting the carrier replica benhcmarks...")
+    push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"\usepgfplotslibrary{fillbetween}")
+    pgfplot = @pgf TikzPicture(
+        Axis({
+            xlabel = "Abtwastwerte",
+            ylabel = "Zeit / s",
+            ymode = "log",
+            title = "Laufzeit der gencarrierreplica!",
+            xmajorgrids,
+            ymajorgrids,
+            scaled_ticks = "false",
+            legend_pos = "outer north east"
+            },
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                "name path=CPUmin",
+                style ="{solid}",
+            }, Coordinates(data.Samples, 10^(-9)*datamin.sCPU_time)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            }, Coordinates(data.Samples, 10^(-9)*datamed.sCPU_time)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                "name path=CPUmean",
+                style ="{dotted}",
+            }, Coordinates(data.Samples, 10^(-9)*datamean.sCPU_time)),
+            PlotInc({
+                thick, 
+                color = "blue", 
+                fill = "blue", 
+                opacity = 0.2 },
+            raw"fill between [of=CPUmin and CPUmean]"),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                "name path=GPUmin",
+                style ="{solid}",
+            },Coordinates(data.Samples, 10^(-9)*datamin.GPU_time)),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            },Coordinates(data.Samples, 10^(-9)*datamed.GPU_time)),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                "name path=GPUmean",
+                style ="{dotted}",
+            },Coordinates(data.Samples, 10^(-9)*datamean.GPU_time)),
+            PlotInc({
+                thick, 
+                color = "red", 
+                fill = "red", 
+                opacity = 0.2 },
+            raw"fill between [of=GPUmin and GPUmean]"),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                "name path=sGPUmin",
+                style ="{solid}",
+            },Coordinates(data.Samples, 10^(-9)*datamin.sGPU_time)),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            },Coordinates(data.Samples, 10^(-9)*datamed.sGPU_time)),
+            PlotInc({
+                green,
+                mark="x",
+                thin,
+                "name path=sGPUmean",
+                style ="{dotted}",
+            },Coordinates(data.Samples, 10^(-9)*datamean.sGPU_time)),
+            PlotInc({
+                thick, 
+                color = "green", 
+                fill = "green", 
+                opacity = 0.2 },
+            raw"fill between [of=sGPUmin and sGPUmean]"),
+            Legend([
+                "StructArray CPU Minimum", "StructArray CPU Median", "StructArray CPU Mean", "",
+                "CuArray GPU Minimum", "CuArray GPU Median", "CuArray GPU Mean", "",
+                "StructArray GPU Minimum", "StructArray GPU Median", "StructArray GPU Mean", ""])
+        )
+    )
+    pgfsave(targetdirtex, pgfplot) 
+    pgfsave(targetdirpng, pgfplot, dpi = 300)
+    println("Saved the carrierreplica plot")
 end
 
 function plot_downconvert(data=DataFrame!(CSV.File("data/downconvert.csv")), targetdirtex="plots/downconvert.tex", targetdirpng="plots/downconvert.png")
