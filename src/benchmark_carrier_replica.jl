@@ -32,7 +32,7 @@ function benchmark_carrier_replica()
         )
 
         # do the benchmark
-        println("Benchmarking carrier_replica on CPU: StructArray{ComplexF32} ", N," samples, ", M," antenna...")
+        println("Benchmarking carrier_replica on CPU: StructArray{ComplexF32} ", N," samples...")
         result = @benchmark cpu_gen_carrier_replica!(
             $scpucarrier,
             1500,
@@ -46,7 +46,7 @@ function benchmark_carrier_replica()
         results_min.sCPU_time[rowpos] = minimum(result).time
         results_med.sCPU_time[rowpos] = median(result).time
         results_mean.sCPU_time[rowpos] = mean(result).time
-        println("Benchmarking carrier_replica on GPU: CuArray{ComplexF32} ", N, " samples, ", M," antenna...")
+        println("Benchmarking carrier_replica on GPU: CuArray{ComplexF32} ", N, " samples...")
         result = @benchmark CUDA.@sync gpu_gen_carrier_replica!(
             $gpucarrier,
             1500,
@@ -60,7 +60,7 @@ function benchmark_carrier_replica()
         results_min.GPU_time[rowpos] = minimum(result).time
         results_med.GPU_time[rowpos] = median(result).time
         results_mean.GPU_time[rowpos] = mean(result).time
-        println("Benchmarking carrier_replica on GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples, ", M," antenna...")
+        println("Benchmarking carrier_replica on GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples...")
         result = @benchmark CUDA.@sync gpu_gen_carrier_replica!(
             $sgpucarrier,
             1500,
