@@ -43,7 +43,8 @@ module GNSSBenchmarks
         benchmark_code_replica,
         benchmark_correlate,
         benchmark_tracking_loop,
-        plot_carrier_replica
+        plot_carrier_replica,
+        cpu_correlate
 
     include("main.jl")
     include("plot.jl")
