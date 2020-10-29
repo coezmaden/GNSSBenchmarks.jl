@@ -17,3 +17,21 @@ function gpu_gen_code_replica!(
         )
 end
 
+# CPU Array Blueprint
+function gpu_gen_code_replica!(
+    code_replica::Array,
+    system::AbstractGNSSSystem,
+    code_frequency,
+    sampling_frequency,
+    start_code_phase::AbstractFloat,
+    start_sample::Integer,
+    num_samples::Integer,
+    early_late_sample_shift,
+    prn::Integer
+)
+    code_replica = GNSSSignals.get_code(
+            system,
+            code_frequency .* (1:MAX_NUM_SAMPLES) ./ sampling_frequency .+ start_code_phase,
+            prn
+        )
+end
