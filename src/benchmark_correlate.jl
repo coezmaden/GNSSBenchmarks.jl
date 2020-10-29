@@ -1,4 +1,41 @@
 function benchmark_correlate()
+    results_min = DataFrame(
+        Samples = SAMPLES, 
+        sCPU_time = zeros(Float64,length(SAMPLES)),
+        GPU_time = zeros(Float64,length(SAMPLES)),
+        sGPU_time = zeros(Float64,length(SAMPLES)),
+    )
+    results_med = DataFrame(
+        Samples = SAMPLES, 
+        sCPU_time = zeros(Float64,length(SAMPLES)),
+        GPU_time = zeros(Float64,length(SAMPLES)),
+        sGPU_time = zeros(Float64,length(SAMPLES)),
+    )
+    results_mean = DataFrame(
+        Samples = SAMPLES, 
+        sCPU_time = zeros(Float64,length(SAMPLES)),
+        GPU_time = zeros(Float64,length(SAMPLES)),
+        sGPU_time = zeros(Float64,length(SAMPLES)),
+    )
+    rowpos = Int32(1)
+    for N in SAMPLES
+        #init signals
+        correlator = EarlyPromptLateCorrelator(0.0 + 0.0im, 0.0 + 0.0im, 0.0 + 0.0im)
+        gpsl1 = GNSSSignals.GPSL1()
+        early_late_sample_shift = 1
+        gpucode = GNSSSignals.get_code(
+            gpsl1,
+            (1 - early_late_sample_shift:N + early_late_sample_shift) * 1023e3 / 2.5e6,
+            1
+        )
+        cpucode = Array{ComplexF32}(gpucode)
+        cpudwnsignal = Array{ComplexF32}(cpucode .+ zeros(N) .* im)
+        scpudwnsignal = StructArray{ComplexF32}((real(cpudwnsignal),imag(cpudwnsignal)))
+        gpudwnsignal = CuArray{ComplexF32}(cpudwnsignal)
+        sgpudwnsignal = StructArray{ComplexF32}((real(gpudwnsignal),imag(gpudwnsignal)))
+    end
+
+
     #init signals
     correlator = EarlyPromptLateCorrelator(0.0 + 0.0im, 0.0 + 0.0im, 0.0 + 0.0im)
     early_late_sample_shift = 1

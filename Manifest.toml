@@ -149,10 +149,8 @@ deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[GNSSSignals]]
-deps = ["DocStringExtensions", "FixedPointSinCosApproximations", "LoopVectorization", "Statistics", "StructArrays", "Unitful"]
-git-tree-sha1 = "96e4202da6cac20515c0f114a76c5a8dab98b07d"
-repo-rev = "feature/gpu"
-repo-url = "/home/coz/github/GNSSSignals.jl"
+deps = ["CUDA", "DocStringExtensions", "FixedPointSinCosApproximations", "LoopVectorization", "Statistics", "StructArrays", "Unitful"]
+path = "/home/coz/github/GNSSSignals.jl"
 uuid = "52c80523-2a4e-5c38-8979-05588f836870"
 version = "0.13.0"
 

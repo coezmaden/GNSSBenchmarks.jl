@@ -1,7 +1,7 @@
 # GPU CuArray Blueprint
 function gpu_gen_code_replica!(
     code_replica::CuArray{ComplexF32},
-    ::Type{S},
+    system::AbstractGNSSSystem{T},
     code_frequency,
     sampling_frequency,
     start_code_phase::AbstractFloat,
@@ -9,13 +9,11 @@ function gpu_gen_code_replica!(
     num_samples::Integer,
     early_late_sample_shift,
     prn::Integer
-) where S <: AbstractGNSSSystem
-    code_replica = CuArray{ComplexF32}(
-        GNSSSignals.get_code.(
-            GPSL1,
+) where T
+    code_replica = GNSSSignals.get_code(
+            system,
             code_frequency .* (1:MAX_NUM_SAMPLES) ./ sampling_frequency .+ start_code_phase,
             prn
         )
-    )
 end
 
