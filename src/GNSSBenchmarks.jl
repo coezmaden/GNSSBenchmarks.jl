@@ -9,7 +9,8 @@ module GNSSBenchmarks
         TrackingLoopFilters,
         GNSSSignals,
         DataFrames,
-        PGFPlotsX
+        PGFPlotsX,
+        LinearAlgebra
 
     using Unitful: upreferred, Hz, dBHz, ms, kHz, MHz
     
@@ -30,6 +31,7 @@ module GNSSBenchmarks
         Tracking.get_default_post_corr_filter,
         Tracking.get_num_samples_left_to_integrate,
         Tracking.get_num_samples,
+        Tracking.get_num_ants,
         Tracking.get_current_carrier_frequency,
         Tracking.get_current_code_frequency,
         TrackingLoopFilters.AbstractLoopFilter,
@@ -44,7 +46,7 @@ module GNSSBenchmarks
         benchmark_correlate,
         benchmark_tracking_loop,
         plot_carrier_replica,
-        cpu_correlate
+        gpu_correlate
 
     include("main.jl")
     include("plot.jl")
