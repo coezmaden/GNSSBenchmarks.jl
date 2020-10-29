@@ -110,18 +110,16 @@ function gpu_correlate(
     late = zero(ComplexF32)
     prompt = zero(ComplexF32)
     early = zero(ComplexF32)
-    @views late = 
-                transpose(downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),1:end]
-                + 1im*downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),1:end])* 
+    late = 
+                (downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),1:end]
+                + 1im*downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),1:end])'* 
                 code[start_sample:num_samples_left + start_sample - 1]
-    @views prompt =
-                transpose(downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),1:end]
-                + 1im*downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),1:end])*
+    prompt= (downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),1:end]
+                + 1im*downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),1:end])' *
                 code[(start_sample:num_samples_left + start_sample - 1) .+ early_late_sample_shift]
-    @views early = 
-                transpose(downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),1:end]
-                + downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),1:end])*
-                code[(start_sample:num_samples_left + start_sample - 1) .+ 2 * early_late_sample_shift]
+    early = (downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),1:end]
+            + downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),1:end])'*
+            code[(start_sample:num_samples_left + start_sample - 1) .+ 2 * early_late_sample_shift]
     EarlyPromptLateCorrelator(
         Tracking.get_early(correlator) + early, 
         Tracking.get_prompt(correlator) + prompt,
