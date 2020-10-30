@@ -17,14 +17,15 @@ function benchmark_code_replica()
     rowpos = Int32(1)
     for N in SAMPLES
         #init signals
-        cpucode = zeros(Int16, N + 2)
-        gpucode = CuArray{ComplexF32}(cpucode)
+        
         code_frequency = 1023e3
         sampling_frequency = 2.5e6
         start_code_phase = 0.0
         start_sample = 1
         early_late_sample_shift = 1
         prn = 1
+        cpucode = zeros(Int16,N+2*early_late_sample_shift)
+        gpucode = CuArray{ComplexF32}(cpucode)
 
         gpsl1 = GNSSSignals.GPSL1()
         gpsl1cpu = GNSSSignals.GPSL1(gpsl1)
