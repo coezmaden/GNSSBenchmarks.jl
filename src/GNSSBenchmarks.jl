@@ -10,7 +10,8 @@ module GNSSBenchmarks
         GNSSSignals,
         DataFrames,
         PGFPlotsX,
-        LinearAlgebra
+        LinearAlgebra,
+        StaticArrays
 
     using Unitful: upreferred, Hz, dBHz, ms, kHz, MHz
     
@@ -46,7 +47,9 @@ module GNSSBenchmarks
         benchmark_correlate,
         benchmark_tracking_loop,
         plot_carrier_replica,
-        gpu_correlate
+        gpu_correlate,
+        plot_correlate_all,
+        sgpu_correlate
 
     include("main.jl")
     include("plot.jl")

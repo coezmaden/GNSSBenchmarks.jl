@@ -30,7 +30,7 @@ function gpu_correlate(
 end
 
 function correlate(
-    correlator::EarlyPromptLateCorrelator,
+    correlator::EarlyPromptLateCorrelator{<: SVector{N}},
     downconverted_signal::StructArray{Complex{Float32},2,NamedTuple{(:re, :im),Tuple{Array{Float32,2},Array{Float32,2}}},Int64},
     code,
     early_late_sample_shift,
@@ -60,7 +60,7 @@ function correlate(
 end
 
 
-function gpu_correlate(
+function sgpu_correlate(
     correlator::EarlyPromptLateCorrelator,
     downconverted_signal_re::CuArray,
     downconverted_signal_im::CuArray,
@@ -95,8 +95,8 @@ function gpu_correlate(
 end
 
 # StructArray GPU
-function gpu_correlate(
-    correlator::EarlyPromptLateCorrelator,
+function sgpu_correlate(
+    correlator::EarlyPromptLateCorrelator{<: SVector{N}},
     downconverted_signal_re::CuMatrix,
     downconverted_signal_im::CuMatrix,
     code,
@@ -106,24 +106,32 @@ function gpu_correlate(
     agc_attenuation,
     agc_bits,
     carrier_bits::Val{NC}
-) where NC
-    late = zero(ComplexF32)
-    prompt = zero(ComplexF32)
-    early = zero(ComplexF32)
-    late = 
-                (downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),1:end]
-                + 1im*downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),1:end])'* 
-                code[start_sample:num_samples_left + start_sample - 1]
-    prompt= (downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),1:end]
-                + 1im*downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),1:end])' *
-                code[(start_sample:num_samples_left + start_sample - 1) .+ early_late_sample_shift]
-    early = (downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),1:end]
-            + downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),1:end])'*
-            code[(start_sample:num_samples_left + start_sample - 1) .+ 2 * early_late_sample_shift]
+) where {N, NC}
+    late = zero(MVector{N, ComplexF32})
+    prompt = zero(MVector{N, ComplexF32})
+    early = zero(MVector{N, ComplexF32})
+    for i in 1:N
+        late[i] = @views dot(
+            code[start_sample:num_samples_left + start_sample - 1],(
+            downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),i] + 
+            1im*downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),i])) 
+    end
+    for i in 1:N
+        prompt[i] = @views dot(
+            code[start_sample+early_late_sample_shift:num_samples_left + start_sample + early_late_sample_shift - 1],(
+            downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),i] +
+            1im*downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),i]))
+    end
+    for i in 1:N
+        early[i] = @views dot(
+            code[start_sample+2*early_late_sample_shift:num_samples_left + start_sample + 2*early_late_sample_shift - 1],(
+            downconverted_signal_re[(start_sample:num_samples_left + start_sample - 1),i] +
+            1im*downconverted_signal_im[(start_sample:num_samples_left + start_sample - 1),i]))
+    end
     EarlyPromptLateCorrelator(
-        Tracking.get_early(correlator) + early, 
-        Tracking.get_prompt(correlator) + prompt,
-        Tracking.get_late(correlator) + late
+        Tracking.get_early(correlator) .+ early, 
+        Tracking.get_prompt(correlator) .+ prompt,
+        Tracking.get_late(correlator) .+ late
     )
 end
 
@@ -154,7 +162,7 @@ end
 
 # Mulit Antenne CuArray
 function gpu_correlate(
-    correlator::EarlyPromptLateCorrelator,
+    correlator::EarlyPromptLateCorrelator{<: SVector{N}},
     downconverted_signal::CuArray{Complex{Float32},2},
     code,
     early_late_sample_shift,
@@ -163,17 +171,26 @@ function gpu_correlate(
     agc_attenuation,
     agc_bits,
     carrier_bits::Val{NC}
-) where NC
-    late = zero(ComplexF32)
-    prompt = zero(ComplexF32)
-    early = zero(ComplexF32)
-    late = downconverted_signal[(start_sample:num_samples_left + start_sample - 1),1:end]' * code[start_sample:num_samples_left + start_sample - 1]
-    prompt = downconverted_signal[(start_sample:num_samples_left + start_sample - 1),1:end]' * code[early_late_sample_shift .+ (start_sample:num_samples_left + start_sample - 1)]
-    early = downconverted_signal[(start_sample:num_samples_left + start_sample - 1),1:end]' * code[2*early_late_sample_shift .+ (start_sample:num_samples_left + start_sample - 1)]
+)  where {N, NC}
+    late = zero(MVector{N, ComplexF32})
+    prompt = zero(MVector{N, ComplexF32})
+    early = zero(MVector{N, ComplexF32})
+    for i in 1:N
+        late[i] = @views dot(code[start_sample:num_samples_left + start_sample - 1],
+        downconverted_signal[(start_sample:num_samples_left + start_sample - 1),i]) 
+    end
+    for i in 1:N
+        prompt[i] = @views dot(code[start_sample+early_late_sample_shift:num_samples_left + start_sample + early_late_sample_shift - 1],
+        downconverted_signal[(start_sample:num_samples_left + start_sample - 1),i])
+    end
+    for i in 1:N
+        early[i] = @views dot(code[start_sample+2*early_late_sample_shift:num_samples_left + start_sample + 2*early_late_sample_shift - 1],
+        downconverted_signal[(start_sample:num_samples_left + start_sample - 1),i])
+    end
     EarlyPromptLateCorrelator(
-        Tracking.get_early(correlator) + early, 
-        Tracking.get_prompt(correlator) + prompt,
-        Tracking.get_late(correlator) + late
+        Tracking.get_early(correlator) .+ early, 
+        Tracking.get_prompt(correlator) .+ prompt,
+        Tracking.get_late(correlator) .+ late
     )
 end
 

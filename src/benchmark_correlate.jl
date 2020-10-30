@@ -109,9 +109,10 @@ function benchmark_correlate()
 
 
             println("Benchmarking downconvert on GPU: StructArray{ComplexF32}(CuArray,CuArray) ", N, " samples, ", M, " antenna...")
-            result = @benchmark CUDA.@sync gpu_correlate(
+            result = @benchmark CUDA.@sync sgpu_correlate(
                 $correlator,
-                $sgpudwnsignal,
+                $sgpudwnsignal.re,
+                $sgpudwnsignal.im,
                 $gpucode,
                 $early_late_sample_shift,
                 1,

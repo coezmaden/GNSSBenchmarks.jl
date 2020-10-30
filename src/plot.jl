@@ -60,20 +60,20 @@ function plot_carrier_replica_all(
                 thin,
                 "name path=CPUmin",
                 style ="{solid}",
-            }, Coordinates(data.Samples, 10^(-9)*datamin.sCPU_time)),
+            }, Coordinates(datamin.Samples, 10^(-9)*datamin.sCPU_time)),
             PlotInc({
                 blue,
                 mark="x",
                 thin,
                 style ="{dashed}",
-            }, Coordinates(data.Samples, 10^(-9)*datamed.sCPU_time)),
+            }, Coordinates(datamed.Samples, 10^(-9)*datamed.sCPU_time)),
             PlotInc({
                 blue,
                 mark="x",
                 thin,
                 "name path=CPUmean",
                 style ="{dotted}",
-            }, Coordinates(data.Samples, 10^(-9)*datamean.sCPU_time)),
+            }, Coordinates(datamean.Samples, 10^(-9)*datamean.sCPU_time)),
             PlotInc({
                 thick, 
                 color = "blue", 
@@ -86,20 +86,20 @@ function plot_carrier_replica_all(
                 thin,
                 "name path=GPUmin",
                 style ="{solid}",
-            },Coordinates(data.Samples, 10^(-9)*datamin.GPU_time)),
+            },Coordinates(datamin.Samples, 10^(-9)*datamin.GPU_time)),
             PlotInc({
                 red,
                 mark="x",
                 thin,
                 style ="{dashed}",
-            },Coordinates(data.Samples, 10^(-9)*datamed.GPU_time)),
+            },Coordinates(datamed.Samples, 10^(-9)*datamed.GPU_time)),
             PlotInc({
                 red,
                 mark="x",
                 thin,
                 "name path=GPUmean",
                 style ="{dotted}",
-            },Coordinates(data.Samples, 10^(-9)*datamean.GPU_time)),
+            },Coordinates(datamean.Samples, 10^(-9)*datamean.GPU_time)),
             PlotInc({
                 thick, 
                 color = "red", 
@@ -112,20 +112,20 @@ function plot_carrier_replica_all(
                 thin,
                 "name path=sGPUmin",
                 style ="{solid}",
-            },Coordinates(data.Samples, 10^(-9)*datamin.sGPU_time)),
+            },Coordinates(datamin.Samples, 10^(-9)*datamin.sGPU_time)),
             PlotInc({
                 green,
                 mark="x",
                 thin,
                 style ="{dashed}",
-            },Coordinates(data.Samples, 10^(-9)*datamed.sGPU_time)),
+            },Coordinates(datamed.Samples, 10^(-9)*datamed.sGPU_time)),
             PlotInc({
                 green,
                 mark="x",
                 thin,
                 "name path=sGPUmean",
                 style ="{dotted}",
-            },Coordinates(data.Samples, 10^(-9)*datamean.sGPU_time)),
+            },Coordinates(datamean.Samples, 10^(-9)*datamean.sGPU_time)),
             PlotInc({
                 thick, 
                 color = "green", 
@@ -570,6 +570,93 @@ function plot_correlate()
     pgfsave("plots/correlate.tex", pgfplot) 
     pgfsave("plots/correlate.png", pgfplot, dpi = 300)
     println("Saved the correlations plot under /plots")
+end
+
+function plot_correlate_all(
+    datamin=DataFrame!(CSV.File("data/correlate_min.csv"))
+)   
+push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"\usepgfplotslibrary{fillbetween}")
+    pgfplot = @pgf TikzPicture(
+        Axis({
+            xlabel = "Abtwastwerte",
+            ylabel = "Programmlaufzeit [s]",
+            ymode = "log",
+            title = "correlate",
+            xmajorgrids,
+            ymajorgrids,
+            scaled_ticks = "false",
+            legend_pos = "outer north east"
+            },
+            PlotInc({
+                cyan,
+                mark="x",
+                thin,
+                style ="{solid}",
+            }, Coordinates(datamin.Samples, 10^(-9)*datamin.sCPU_time_1ant)),
+            PlotInc({
+                teal,
+                mark="x",
+                thin,
+                style ="{solid}",
+            }, Coordinates(datamin.Samples, 10^(-9)*datamin.sCPU_time_4ant)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                style ="{solid}",
+            }, Coordinates(datamin.Samples, 10^(-9)*datamin.sCPU_time_16ant)),
+            PlotInc({
+                color="magenta",
+                mark="x",
+                thin,
+                style ="{solid}",
+            },Coordinates(datamin.Samples, 10^(-9)*datamin.GPU_time_1ant)),
+            PlotInc({
+                color="red",
+                mark="x",
+                thin,
+                style ="{solid}",
+            },Coordinates(datamin.Samples, 10^(-9)*datamin.GPU_time_4ant)),
+            PlotInc({
+                color="violet",
+                mark="x",
+                thin,
+                style ="{solid}",
+            },Coordinates(datamin.Samples, 10^(-9)*datamin.GPU_time_16ant)),
+            PlotInc({
+                color="lime",
+                mark="x",
+                thin,
+                style ="{solid}",
+            },Coordinates(datamin.Samples, 10^(-9)*datamin.sGPU_time_1ant)),
+            PlotInc({
+                color="green",
+                mark="x",
+                thin,
+                style ="{solid}",
+            },Coordinates(datamin.Samples, 10^(-9)*datamin.sGPU_time_4ant)),
+            PlotInc({
+                color="green!50!black",
+                mark="x",
+                thin,
+                style ="{solid}",
+            },Coordinates(datamin.Samples, 10^(-9)*datamin.sGPU_time_16ant)),
+            Legend([
+                "StructArray CPU Minimum Ant=1",
+                "StructArray CPU Minimum Ant=4",
+                "StructArray CPU Minimum Ant=16",
+                "CuArray GPU Minimum Ant=1",
+                "CuArray GPU Minimum Ant=4",
+                "CuArray GPU Minimum Ant=16",
+                "StructArray GPU Minimum Ant=1",
+                "StructArray GPU Minimum Ant=4",
+                "StructArray GPU Minimum Ant=16"])
+        )
+    )
+    pgfsave("plots/correlate.tex", pgfplot) 
+    pgfsave("plots/correlate.png", pgfplot, dpi = 300)
+    println("Saved the correlations plot under /plots")
+
 end
 
 function plot_code_replica()
