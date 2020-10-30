@@ -49,7 +49,8 @@ module GNSSBenchmarks
         plot_carrier_replica,
         gpu_correlate,
         plot_correlate_all,
-        sgpu_correlate
+        sgpu_correlate,
+        plot_code_replica_all
 
     include("main.jl")
     include("plot.jl")

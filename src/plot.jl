@@ -143,6 +143,88 @@ function plot_carrier_replica_all(
     println("Saved the carrierreplica plot")
 end
 
+function plot_code_replica_all(
+    datamin=DataFrame!(CSV.File("data/codereplica_min_jetson.csv")),
+    datamed=DataFrame!(CSV.File("data/codereplica_med_jetson.csv")),
+    datamean=DataFrame!(CSV.File("data/codeprelica_mean_jetson.csv")),
+    targetdirtex="plots/codereplica_jetson.tex", 
+    targetdirpng="plots/codereplica_jetson.png"
+)
+    println("Plotting the carrier replica benhcmarks...")
+    push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"\usepgfplotslibrary{fillbetween}")
+    pgfplot = @pgf TikzPicture(
+        Axis({
+            xlabel = "Abtwastwerte",
+            ylabel = "Programmlaufzeit [s]",
+            ymode = "log",
+            title = "Jetson",
+            xmajorgrids,
+            ymajorgrids,
+            scaled_ticks = "false",
+            legend_pos = "outer north east"
+            },
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                "name path=CPUmin",
+                style ="{solid}",
+            }, Coordinates(datamin.Samples, 10^(-9)*datamin.CPU_time)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            }, Coordinates(datamed.Samples, 10^(-9)*datamed.CPU_time)),
+            PlotInc({
+                blue,
+                mark="x",
+                thin,
+                "name path=CPUmean",
+                style ="{dotted}",
+            }, Coordinates(datamean.Samples, 10^(-9)*datamean.CPU_time)),
+            PlotInc({
+                thick, 
+                color = "blue", 
+                fill = "blue", 
+                opacity = 0.2 },
+            raw"fill between [of=CPUmin and CPUmean]"),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                "name path=GPUmin",
+                style ="{solid}",
+            },Coordinates(datamin.Samples, 10^(-9)*datamin.GPU_time)),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                style ="{dashed}",
+            },Coordinates(datamed.Samples, 10^(-9)*datamed.GPU_time)),
+            PlotInc({
+                red,
+                mark="x",
+                thin,
+                "name path=GPUmean",
+                style ="{dotted}",
+            },Coordinates(datamean.Samples, 10^(-9)*datamean.GPU_time)),
+            PlotInc({
+                thick, 
+                color = "red", 
+                fill = "red", 
+                opacity = 0.2 },
+            raw"fill between [of=GPUmin and GPUmean]"),
+            Legend([
+                "StructArray CPU Minimum", "StructArray CPU Median", "StructArray CPU Mean", "",
+                "CuArray GPU Minimum", "CuArray GPU Median", "CuArray GPU Mean", "",])
+        )
+    )
+    pgfsave(targetdirtex, pgfplot) 
+    pgfsave(targetdirpng, pgfplot, dpi = 300)
+    println("Saved the codereplica plot")
+end
+
 function plot_downconvert(data=DataFrame!(CSV.File("data/downconvert.csv")), targetdirtex="plots/downconvert.tex", targetdirpng="plots/downconvert.png")
     println("Plotting the downconvert benhcmarks...")
     pgfplot = @pgf TikzPicture(
@@ -269,20 +351,16 @@ function plot_downconvert_gpu_gpu(data=DataFrame!(CSV.File("data/downconvert.csv
 end
 
 function plot_downconvert_all(
-    datamin=DataFrame!(CSV.File("data/carrierreplica_min.csv")),
-    datamed=DataFrame!(CSV.File("data/carrierreplica_med.csv")),
-    datamean=DataFrame!(CSV.File("data/carrierreplica_mean.csv")),
-    targetdirtex="plots/carrierreplica_all.tex", 
-    targetdirpng="plots/carrierreplica_all.png"
+    datamin=DataFrame!(CSV.File("data/donwconvert_min.csv")),
 )
-    println("Plotting the carrier replica benhcmarks...")
+    println("Plotting the downconvert benhcmarks...")
     push!(PGFPlotsX.CUSTOM_PREAMBLE, raw"\usepgfplotslibrary{fillbetween}")
     pgfplot = @pgf TikzPicture(
         Axis({
             xlabel = "Abtwastwerte",
-            ylabel = "Zeit / s",
+            ylabel = "Programmlaufzeit [s]",
             ymode = "log",
-            title = "Laufzeit der donwconvert!",
+            title = "Desktop PC",
             xmajorgrids,
             ymajorgrids,
             scaled_ticks = "false",
@@ -309,31 +387,12 @@ function plot_downconvert_all(
                 style ="{dotted}",
             }, Coordinates(data.Samples, 10^(-9)*datamean.sCPU_time_1ant)),
             PlotInc({
-                thick, 
-                color = "blue", 
-                fill = "blue", 
-                opacity = 0.2 },
-            raw"fill between [of=CPUmin1ant and CPUmean1ant]"),
-            PlotInc({
                 blue,
                 mark="x",
                 thin,
                 "name path=CPUmin4ant",
                 style ="{solid}",
             }, Coordinates(data.Samples, 10^(-9)*datamin.sCPU_time_4ant)),
-            PlotInc({
-                blue,
-                mark="x",
-                thin,
-                style ="{dashed}",
-            }, Coordinates(data.Samples, 10^(-9)*datamed.sCPU_time_4ant)),
-            PlotInc({
-                blue,
-                mark="x",
-                thin,
-                "name path=CPUmean4ant",
-                style ="{dotted}",
-            }, Coordinates(data.Samples, 10^(-9)*datamean.sCPU_time_4ant)),
             PlotInc({
                 thick, 
                 color = "blue", 

@@ -2,17 +2,17 @@ function benchmark_code_replica()
     results_min = DataFrame(
         Samples = SAMPLES, 
         CPU_time = zeros(Float64,length(SAMPLES)),
-        #GPU_time = zeros(Float64,length(SAMPLES))
+        GPU_time = zeros(Float64,length(SAMPLES))
     )
     results_med = DataFrame(
         Samples = SAMPLES, 
         CPU_time = zeros(Float64,length(SAMPLES)),
-        #GPU_time = zeros(Float64,length(SAMPLES))
+        GPU_time = zeros(Float64,length(SAMPLES))
     )
     results_mean = DataFrame(
         Samples = SAMPLES, 
         CPU_time = zeros(Float64,length(SAMPLES)),
-        #GPU_time = zeros(Float64,length(SAMPLES))
+        GPU_time = zeros(Float64,length(SAMPLES))
     )
     rowpos = Int32(1)
     for N in SAMPLES
@@ -46,28 +46,28 @@ function benchmark_code_replica()
         results_med.CPU_time[rowpos] = median(result).time
         results_mean.CPU_time[rowpos] = mean(result).time
 
-        # println("Benchmarking code_replica on GPU: CuArray{ComplexF32} ", N, " samples...")
-        # result = @benchmark CUDA.@sync gpu_gen_code_replica!(
-        #     $gpucode,
-        #     $gpsl1,
-        #     $code_frequency,
-        #     $sampling_frequency,
-        #     $start_code_phase,
-        #     $start_sample,
-        #     $N,
-        #     $early_late_sample_shift,
-        #     $prn
-        # )
-        # println(result)
-        # results_min.GPU_time[rowpos] = minimum(result).time
-        # results_med.GPU_time[rowpos] = median(result).time
-        # results_mean.GPU_time[rowpos] = mean(result).time
+        println("Benchmarking code_replica on GPU: CuArray{ComplexF32} ", N, " samples...")
+        result = @benchmark CUDA.@sync gpu_gen_code_replica!(
+            $gpucode,
+            $gpsl1,
+            $code_frequency,
+            $sampling_frequency,
+            $start_code_phase,
+            $start_sample,
+            $N,
+            $early_late_sample_shift,
+            $prn
+        )
+        println(result)
+        results_min.GPU_time[rowpos] = minimum(result).time
+        results_med.GPU_time[rowpos] = median(result).time
+        results_mean.GPU_time[rowpos] = mean(result).time
 
         rowpos += 1
     end
-    # CSV.write("data/codeprelica_min.csv", results_min)
-    # CSV.write("data/codeprelica_med.csv", results_med)
-    # CSV.write("data/codeprelica_mean.csv", results_mean)
+    CSV.write("data/codeprelica_min.csv", results_min)
+    CSV.write("data/codeprelica_med.csv", results_med)
+    CSV.write("data/codeprelica_mean.csv", results_mean)
     CSV.write("data/codeprelicacpu_min.csv", results_min)
     CSV.write("data/codeprelicacpu_med.csv", results_med)
     CSV.write("data/codeprelicacpu_mean.csv", results_mean)

@@ -12,7 +12,7 @@ function gpu_gen_code_replica!(
 ) where T
     code_replica = GNSSSignals.get_code(
             system,
-            code_frequency .* (1:MAX_NUM_SAMPLES) ./ sampling_frequency .+ start_code_phase,
+            code_frequency .* (start_sample:start_sample + num_samples + 2*early_late_sample_shift) ./ sampling_frequency .+ start_code_phase,
             prn
         )
 end
@@ -31,7 +31,7 @@ function gpu_gen_code_replica!(
 )
     code_replica = GNSSSignals.get_code(
             system,
-            code_frequency .* (1:MAX_NUM_SAMPLES) ./ sampling_frequency .+ start_code_phase,
+            code_frequency .* (start_sample:start_sample + num_samples + 2*early_late_sample_shift) ./ sampling_frequency .+ start_code_phase,
             prn
         )
 end
